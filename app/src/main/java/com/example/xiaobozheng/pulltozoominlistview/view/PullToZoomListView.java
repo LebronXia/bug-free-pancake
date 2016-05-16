@@ -3,10 +3,10 @@ package com.example.xiaobozheng.pulltozoominlistview.view;
 import android.app.Activity;
 import android.content.Context;
 import android.os.SystemClock;
-import android.text.Layout;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.widget.AbsListView;
@@ -17,10 +17,13 @@ import android.widget.ListView;
 /**
  * Created by xiaobozheng on 5/16/2016.
  */
-public class PullToZoomListView extends ListView{
+public class PullToZoomListView extends ListView  implements
+            AbsListView.OnScrollListener{
 
     private static final int INVALID_VALUE = -1;
     private static final String TAG = "PullToZoomListView";
+
+    int mActivePointerId = -1;
     private FrameLayout mHeaderContainer;
     private int mHeadHeight;//头部视图的高
     private ImageView mHeaderImage;
@@ -88,13 +91,71 @@ public class PullToZoomListView extends ListView{
         this.mHeaderImage = new ImageView(paramContext);
         //屏幕宽度
         int i = localDisplayMetrics.widthPixels;
-        setHeaderV
+        setHeaderViewSize(i, (int) (9.0F * (i / 16.0F)));
 
+        this.mShadow = new ImageView(paramContext);
 
         //指定了该布局的宽和高(-1为宽,-2为高)
         FrameLayout.LayoutParams localLayoutParams = new FrameLayout.LayoutParams(-1,-2);
-    };
+        localLayoutParams.gravity = 80;
+        this.mShadow.setLayoutParams(localLayoutParams);
+        this.mHeaderContainer.addView(this.mHeaderImage);
+        this.mHeaderContainer.addView(this.mShadow);
+        addHeaderView(this.mHeaderContainer);
 
+        //ScalingRunnalable
+        this.mScalingRunnalable = new ScalingRunnalable();
+        super.setOnScrollListener(this);
+    }
+
+    //第二次下拉设为0
+    private void onSecondaryPointerUp(MotionEvent paramMotionEvent){
+        int i = (paramMotionEvent.getAction()) >> 8;
+        if (paramMotionEvent.getPointerId(i) == this.mActivePointerId)
+            if (i != 0){
+                int j = 1;
+                this.mLastMotionY = paramMotionEvent.getY(0);
+                this.mActivePointerId = paramMotionEvent.getPointerId(0);
+                return;
+            }
+    }
+
+    private void reset(){
+        this.mActivePointerId = -1;
+        this.mLastMotionY = -1.0F;
+        this.mMaxScale = -1.0F;
+        this.mLastScale = -1.0F;
+    }
+
+    public ImageView getHeaderView(){
+        return this.mHeaderImage;
+    }
+
+    //返回true表示拦截。
+    public boolean onInterceptTouchEvent(MotionEvent paramMotionEvent) {
+        return super.onInterceptTouchEvent(paramMotionEvent);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        if (this.mHeadHeight == 0){
+            this.mHeadHeight = this.mHeaderContainer.getHeight();
+        }
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+
+        
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    //设置头部的大小
     public void setHeaderViewSize(int paramInt1, int paramInt2){
         Object localObject = this.mHeaderContainer.getLayoutParams();
         if (localObject == null){

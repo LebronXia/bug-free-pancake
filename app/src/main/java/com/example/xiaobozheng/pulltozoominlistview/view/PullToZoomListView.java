@@ -147,7 +147,7 @@ public class PullToZoomListView extends ListView  implements
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
 
-        
+
     }
 
     @Override

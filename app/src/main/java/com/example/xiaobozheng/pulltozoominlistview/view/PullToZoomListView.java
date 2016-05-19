@@ -136,6 +136,7 @@ public class PullToZoomListView extends ListView  implements
         return super.onInterceptTouchEvent(paramMotionEvent);
     }
 
+    // 确定View的位置
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
@@ -146,7 +147,13 @@ public class PullToZoomListView extends ListView  implements
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        float f = this.mHeadHeight - this.mHeaderContainer.getBottom();
 
+        Log.d("fullview", "f+" + f);
+        if ((f > 0.0f) && (f < this.mHeadHeight)){
+            int i = (int) (0.65D * f);
+            this.mHeaderImage.scrollTo(0 , -i);
+        }
 
     }
 
